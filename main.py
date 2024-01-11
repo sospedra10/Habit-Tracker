@@ -5,10 +5,7 @@ import json
 st.title('Habit Tracker')
 
 
-# habits = ['Exercise', 'Eat Healthy', 'Meditate', 'Read', 'Sleep Early', 'Wake Up Early']
-
 # Load data
-#@st.cache_data()
 def load_data():
     with open('data.json', 'r') as f:
         data = json.load(f)
@@ -35,6 +32,7 @@ def create_new_habit():
         }
         if new_habit_name != '' and new_habit_name not in [habit['name'] for habit in habits]:
             habits.append(new_habit)
+            data['habits'] = habits
             with open('data.json', 'w') as f:
                 json.dump(data, f, indent=4)
 
@@ -49,30 +47,18 @@ def delete_new_habit():
         for habit in habits:
             if habit['name'] == delete_habit_name:
                 habits.remove(habit)
+                data['habits'] = habits
                 with open('data.json', 'w') as f:
                     json.dump(data, f, indent=4)
                 break
-
+    
 
 create_new_habit()
 delete_new_habit()
 
 # Overall progress 
-st.markdown('**Overall Progress**')
-total_done_times = sum([habit['done_times'] for habit in habits])
-total_goal_times = sum([habit['goal_total_times_input'] * frequency_options[habit['frequency_goal']] for habit in habits])
-
-try:
-    text = f'{total_done_times}/{total_goal_times}   ~  {total_done_times/total_goal_times*100:.0f}%' 
-    if total_done_times > total_goal_times:
-        progress_bar = st.progress(1.0, text=text)
-    else:
-        progress_bar = st.progress(total_done_times / total_goal_times, text=text)
-except:
-    progress_bar = st.progress(0, text='0/0')
-
-    
-
+overall_progress_container = st.container(border=True)
+overall_progress_container.markdown('**Overall Progress**')
 
 # Create columns
 columns = st.columns(len(habits))
@@ -81,16 +67,14 @@ columns = st.columns(len(habits))
 for i in range(len(habits)):
     with columns[i]:
         st.markdown(f'**{habits[i]["name"]}**')
-        goal_total_times_input = st.number_input('Times Goal:', min_value=0, max_value=30, step=1, key=f'goal{i}')
+        goal_total_times_input = st.number_input('Times Goal:', min_value=0, max_value=30, step=1, key=f'goal{i}', value=habits[i]['goal_total_times_input'])
         # Custom every time period: Year
         predefined_frequency_index = list(frequency_options.keys()).index(habits[i]['frequency_goal'])
-        frequency_goal = st.selectbox('Every:', frequency_options.keys(), key=f'frequency_goal{i}', index=predefined_frequency_index)
+        frequency_goal = st.selectbox('Every:', frequency_options.keys(), index=predefined_frequency_index, key=f'frequency_goal{i}',)
         # Done number times
-        done_times = st.number_input('Times Done:', min_value=0, max_value=9999, step=1, key=f'done{i}')
-
+        done_times = st.number_input('Times Done:', value=habits[i]['done_times'] , min_value=0, max_value=9999, step=1, key=f'done{i}')
         goal_total_times = goal_total_times_input * frequency_options[frequency_goal]
         
-
         # Progress bar
         try:
             text = f'{done_times}/{goal_total_times}   ~  {done_times/goal_total_times*100:.0f}%' 
@@ -99,13 +83,32 @@ for i in range(len(habits)):
             else:
                 progress_bar = st.progress(done_times / goal_total_times, text=text)
         except:
-            progress_bar = st.progress(0, text='0/0')
+            progress_bar = st.progress(0, text=f'{done_times}/0')
 
         # Save data
         habits[i]['goal_total_times_input'] = goal_total_times_input
         habits[i]['frequency_goal'] = frequency_goal
         habits[i]['done_times'] = done_times
 
+        data['habits'] = habits
+
         # Save data to json file
         with open('data.json', 'w') as f:
             json.dump(data, f, indent=4)
+
+
+
+# Updating overall progress
+total_done_times = sum([min(habit['done_times'], habit['goal_total_times_input']*frequency_options[habit['frequency_goal']] ) for habit in habits])
+total_goal_times = sum([habit['goal_total_times_input'] * frequency_options[habit['frequency_goal']] for habit in habits])
+
+try:
+    text = f'{total_done_times}/{total_goal_times}   ~  **{total_done_times/total_goal_times*100:.0f}%**' 
+    if total_done_times > total_goal_times:
+        overall_progress_container.progress(1.0, text=text)
+    else:
+        overall_progress_container.progress(total_done_times / total_goal_times, text=text)
+except:
+    overall_progress_container.progress(0, text='0/0')
+
+
