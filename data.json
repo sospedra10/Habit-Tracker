@@ -3,14 +3,14 @@
         {
             "name": "No alcohol",
             "frequency_goal": "Monthly",
-            "goal_total_times_input": 0,
-            "done_times": 0
+            "goal_total_times_input": 1,
+            "done_times": 1
         },
         {
             "name": "Gym",
             "frequency_goal": "Monthly",
-            "goal_total_times_input": 0,
-            "done_times": 0
+            "goal_total_times_input": 1,
+            "done_times": 1
         },
         {
             "name": "Read",
