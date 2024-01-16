@@ -6,10 +6,14 @@ st.title('Habit Tracker')
 
 
 # Load data
+# @st.cache_data()
 def load_data():
     with open('data.json', 'r') as f:
         data = json.load(f)
     return data
+
+
+
 
 data = load_data()
 habits = data['habits']
@@ -65,7 +69,9 @@ columns = st.columns(len(habits))
 
 
 for i in range(len(habits)):
+    print(i)
     with columns[i]:
+        print(columns[i])
         st.markdown(f'**{habits[i]["name"]}**')
         goal_total_times_input = st.number_input('Times Goal:', min_value=0, max_value=30, step=1, key=f'goal{i}', value=habits[i]['goal_total_times_input'])
         # Custom every time period: Year
@@ -73,6 +79,7 @@ for i in range(len(habits)):
         frequency_goal = st.selectbox('Every:', frequency_options.keys(), index=predefined_frequency_index, key=f'frequency_goal{i}',)
         # Done number times
         done_times = st.number_input('Times Done:', value=habits[i]['done_times'] , min_value=0, max_value=9999, step=1, key=f'done{i}')
+        print(done_times)
         goal_total_times = goal_total_times_input * frequency_options[frequency_goal]
         
         # Progress bar
@@ -90,11 +97,6 @@ for i in range(len(habits)):
         habits[i]['frequency_goal'] = frequency_goal
         habits[i]['done_times'] = done_times
 
-        data['habits'] = habits
-
-        # Save data to json file
-        with open('data.json', 'w') as f:
-            json.dump(data, f, indent=4)
 
 
 
@@ -110,5 +112,13 @@ try:
         overall_progress_container.progress(total_done_times / total_goal_times, text=text)
 except:
     overall_progress_container.progress(0, text='0/0')
+
+
+data['habits'] = habits
+
+# Save data to json file
+# with open('data.json', 'w') as f:
+#     json.dump(data, f, indent=4)
+
 
 
