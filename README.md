@@ -13,7 +13,7 @@ pip install streamlit
 Clone the repository and navigate to the project directory:
 
 ```bash
-git clone https://github.com/your-username/habit-tracker.git
+git clone https://github.com/sospedra10/habit-tracker.git
 cd habit-tracker
 ```
 
